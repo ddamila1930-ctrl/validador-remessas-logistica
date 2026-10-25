@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Auditoria de Carteira e Remessas</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h1 { font-size: 22px; color: #1e293b; margin-bottom: 5px; }
+        p.subtitulo { color: #64748b; font-size: 14px; margin-top: 0; }
+        .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 20px; }
+        .card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; text-align: center; }
+        .card h3 { margin: 0; font-size: 14px; color: #475569; }
+        .card p { font-size: 20px; font-weight: bold; margin: 10px 0 0 0; color: #0f172a; }
+        table { width: 100%; border-collapse: collapse; margin-top: 30px; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+        th { background-color: #f1f5f9; color: #334155; }
+        .badge-ok { color: #166534; background: #dcfce7; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .badge-erro { color: #991b1b; background: #fee2e2; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Painel de Controle de Remessas</h1>
+    <p class="subtitulo">Monitoramento de liberação de pedidos para faturamento</p>
+
+    <div class="cards">
+        <div class="card">
+            <h3>Total na Carteira</h3>
+            <p id="totalGeral">0</p>
+        </div>
+        <div class="card">
+            <h3>Prontos para Faturar</h3>
+            <p id="totalLiberados">0</p>
+        </div>
+        <div class="card">
+            <h3>Com Ruptura</h3>
+            <p id="totalRuptura">0</p>
+        </div>
+        <div class="card">
+            <h3>Sem Transportadora</h3>
+            <p id="totalSemTransp">0</p>
+        </div>
+    </div>
+
+    <table id="tabelaPedidos">
+        <thead>
+            <tr>
+                <th>ID do Pedido</th>
+                <th>Qtd Pedida</th>
+                <th>Qtd Separada</th>
+                <th>Etiqueta Gerada</th>
+                <th>Transportadora</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Preenchido via JavaScript -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    async function carregarDadosAuditoria() {
+        try {
+            const resposta = await fetch('/api/auditoria');
+            const dados = await resposta.json();
+
+            document.getElementById('totalGeral').innerText = dados.totalAnalitico;
+            document.getElementById('totalLiberados').innerText = dados.liberados.length;
+            document.getElementById('totalRuptura').innerText = dados.ruptura.length;
+            document.getElementById('totalSemTransp').innerText = dados.semTransportadora.length;
+
+            const listaBruta = await (await fetch('/dados/pedidos_exemplo.json')).json();
+            
+            const tbody = document.querySelector('#tabelaPedidos tbody');
+            tbody.innerHTML = '';
+
+            for (let pedido of listaBruta) {
+                const tr = document.createElement('tr');
+                
+                let statusEtiqueta = pedido.possuiEtiquetaRemessa 
+                    ? '<span class="badge-ok">Sim</span>' 
+                    : '<span class="badge-erro">Não</span>';
+
+                let transportadoraTexto = pedido.transportadoraAtribuida 
+                    ? pedido.transportadoraAtribuida 
+                    : '<span class="badge-erro">Pendente</span>';
+
+                tr.innerHTML = `
+                    <td><strong>${pedido.pedidoId}</strong></td>
+                    <td>${pedido.quantidadePedido}</td>
+                    <td>${pedido.quantidadeSeparada}</td>
+                    <td>${statusEtiqueta}</td>
+                    <td>${transportadoraTexto}</td>
+                `;
+                tbody.appendChild(tr);
+            }
+        } catch (erro) {
+            console.error("Erro ao carregar dados do painel:", erro);
+        }
+    }
+
+    carregarDadosAuditoria();
+</script>
+
+</body>
+</html>
