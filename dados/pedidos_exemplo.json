@@ -1,0 +1,23 @@
+[
+  {
+    "pedidoId": "PED-88102",
+    "quantidadePedido": 10,
+    "quantidadeSeparada": 10,
+    "possuiEtiquetaRemessa": true,
+    "transportadoraAtribuida": "Transp Express SP"
+  },
+  {
+    "pedidoId": "PED-88103",
+    "quantidadePedido": 5,
+    "quantidadeSeparada": 3,
+    "possuiEtiquetaRemessa": true,
+    "transportadoraAtribuida": ""
+  },
+  {
+    "pedidoId": "PED-88104",
+    "quantidadePedido": 2,
+    "quantidadeSeparada": 2,
+    "possuiEtiquetaRemessa": false,
+    "transportadoraAtribuida": "Logistica Sul"
+  }
+]
